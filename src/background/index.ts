@@ -3,13 +3,13 @@ import { isBuilderPage } from '../lib/utils'
 export const DEFAULT_SETTINGS = {
   enabled: true,
   customColorEnabled: false,
-  customColor: '#000000',
+  customColor: '#1e1e1e',
 }
 
 // Handle extension installation and updates
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
-    chrome.storage.sync.set({ settings: DEFAULT_SETTINGS })
+    chrome.storage.local.set({ settings: DEFAULT_SETTINGS })
   }
 })
 
@@ -21,13 +21,12 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 
   try {
-    const { settings = DEFAULT_SETTINGS } = await chrome.storage.sync.get('settings')
+    const { settings = DEFAULT_SETTINGS } = await chrome.storage.local.get('settings')
 
     if (!settings.enabled || !isBuilderPage()) {
       return
     }
 
-    // Send message to content script to update theme
     chrome.tabs
       .sendMessage(tabId, { action: 'updateSettings', payload: settings })
       .catch((error) => {
@@ -39,18 +38,28 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 })
 
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.action === 'updateSettings') {
-    const settings = message.payload as ISettings
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  switch (message.action) {
+    case 'updateSettings': {
+      const settings = message.payload as ISettings
 
-    chrome.storage.sync.set({ settings })
+      chrome.storage.local.set({ settings })
 
-    chrome.tabs.query({}, (tabs) => {
-      tabs.forEach((tab) => {
-        if (tab.id) {
-          chrome.tabs.sendMessage(tab.id, { action: 'updateSettings', payload: settings })
-        }
+      chrome.tabs.query({}, (tabs) => {
+        tabs.forEach((tab) => {
+          if (tab.id) {
+            chrome.tabs.sendMessage(tab.id, { action: 'updateSettings', payload: settings })
+          }
+        })
       })
-    })
+    }
+
+    case 'getSettings': {
+      chrome.storage.local.get('settings', (result) => {
+        sendResponse({
+          settings: result.settings || DEFAULT_SETTINGS,
+        })
+      })
+    }
   }
 })

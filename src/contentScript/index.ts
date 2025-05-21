@@ -1,8 +1,9 @@
+import { DEFAULT_SETTINGS } from '../background'
 import { isBuilderPage } from '../lib/utils'
 
 let styleElement: HTMLStyleElement | null = null
 
-function injectStyle() {
+function injectStyle(settings: ISettings) {
   try {
     // Remove existing style if any
     if (styleElement) {
@@ -13,7 +14,7 @@ function injectStyle() {
     styleElement.id = 'dark-optin-styles'
     styleElement.textContent = `
         .optn-builder-editor-container {
-            background: red !important;
+            background: ${settings.customColorEnabled ? settings.customColor : '#282b30'};
         }
     `
     document.head.appendChild(styleElement)
@@ -31,10 +32,10 @@ function removeStyle() {
 
 async function initialize() {
   try {
-    const { settings } = await chrome.storage.sync.get(['settings'])
+    const { settings = DEFAULT_SETTINGS } = await chrome.storage.local.get('settings')
 
     if (settings?.enabled && isBuilderPage()) {
-      injectStyle()
+      injectStyle(settings)
     } else {
       removeStyle()
     }
@@ -44,9 +45,10 @@ async function initialize() {
 }
 
 chrome.runtime.onMessage.addListener(
-  ({ action, payload: { enabled = false } }: { action: string; payload: ISettings }) => {
-    if (action === 'updateSettings' && enabled && isBuilderPage()) {
-      injectStyle()
+  ({ action, payload }: { action: string; payload: ISettings }) => {
+    console.log(action, payload)
+    if (action === 'updateSettings' && payload.enabled && isBuilderPage()) {
+      injectStyle(payload)
     } else {
       removeStyle()
     }
