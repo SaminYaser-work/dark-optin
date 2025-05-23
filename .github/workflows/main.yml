@@ -3,7 +3,8 @@ name: Build and Release Chrome Extension
 on:
   push:
     tags:
-      - 'v*'  # Triggers only on version tags like v1.0.0
+      - 'v*'  # still allows tag-triggered release
+  workflow_dispatch:  # 👈 enables manual trigger from GitHub UI
 
 jobs:
   build-and-release:
@@ -30,11 +31,12 @@ jobs:
           zip -r ../dark-optin.zip ./*
           cd ..
 
-      - name: Create Release
+      - name: Create GitHub release (manual only if no tag)
+        if: github.ref_type != 'tag'
         uses: softprops/action-gh-release@v1
         with:
-          name: Release ${{ github.ref_name }}
-          tag_name: ${{ github.ref }}
+          name: Manual Release ${{ github.run_number }}
+          tag_name: manual-${{ github.run_number }}
           files: dark-optin.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
