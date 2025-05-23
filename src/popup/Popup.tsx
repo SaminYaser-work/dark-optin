@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 
 import { DEFAULT_SETTINGS } from '../background'
 import './Popup.css'
@@ -42,7 +42,7 @@ export const Popup = () => {
         {settings.enabled && (
           <>
             <label className="switch-wrapper">
-              <div>Enable Custom Color</div>
+              <div>Custom Color</div>
               <div className="switch">
                 <input
                   className="toggle"
@@ -58,7 +58,7 @@ export const Popup = () => {
 
             {settings.customColorEnabled && (
               <label className="switch-wrapper">
-                <div>Custom Color</div>
+                <div>Choose Color</div>
                 <input
                   type="color"
                   onChange={(e) =>
@@ -75,20 +75,41 @@ export const Popup = () => {
 
   return (
     <main>
-      <h3>
-        Dark <Glasses width={38} height={38} /> Optin
-      </h3>
+      <Title />
 
       {content}
 
-      <a href={link} target="_blank">
-        Created with ⚡ by Samin Yaser
-      </a>
+      <Link />
     </main>
   )
 }
 
-function Glasses(props: React.SVGAttributes<SVGSVGElement>) {
+const Title = memo(() => {
+  return (
+    <h3>
+      Dark{' '}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <Icon width={38} height={38} />
+        ptin
+      </div>
+    </h3>
+  )
+})
+
+const Link = memo(() => {
+  return (
+    <a href={link} target="_blank">
+      Created with ⚡ by Samin Yaser
+    </a>
+  )
+})
+
+function Icon(props: React.SVGAttributes<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -100,11 +121,10 @@ function Glasses(props: React.SVGAttributes<SVGSVGElement>) {
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
+      className="lucide lucide-moon-icon lucide-moon"
       {...props}
     >
-      <circle cx={6} cy={15} r={4} />
-      <circle cx={18} cy={15} r={4} />
-      <path d="M14 15a2 2 0 00-2-2 2 2 0 00-2 2M2.5 13L5 7c.7-1.3 1.4-2 3-2M21.5 13L19 7c-.7-1.3-1.5-2-3-2" />
+      <path d="M12 3a6 6 0 009 9 9 9 0 11-9-9z" />
     </svg>
   )
 }

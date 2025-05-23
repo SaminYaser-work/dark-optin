@@ -5,19 +5,18 @@ let styleElement: HTMLStyleElement | null = null
 
 function injectStyle(settings: ISettings) {
   try {
-    // Remove existing style if any
-    if (styleElement) {
-      styleElement.remove()
+    // Create style tag if it doesn't exist
+    if (!styleElement) {
+      styleElement = document.createElement('style')
+      styleElement.id = 'dark-optin-styles'
+      document.head.appendChild(styleElement)
     }
 
-    styleElement = document.createElement('style')
-    styleElement.id = 'dark-optin-styles'
     styleElement.textContent = `
         .optn-builder-editor-container {
-            background: ${settings.customColorEnabled ? settings.customColor : '#282b30'};
+            background: ${settings.customColorEnabled ? settings.customColor : '#121212'} !important;
         }
     `
-    document.head.appendChild(styleElement)
   } catch (error) {
     console.error('Error injecting style:', error)
   }
@@ -46,7 +45,6 @@ async function initialize() {
 
 chrome.runtime.onMessage.addListener(
   ({ action, payload }: { action: string; payload: ISettings }) => {
-    console.log(action, payload)
     if (action === 'updateSettings' && payload.enabled && isBuilderPage()) {
       injectStyle(payload)
     } else {
