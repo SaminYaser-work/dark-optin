@@ -35,6 +35,6 @@ jobs:
         with:
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref }}
-          files: chrome-extension.zip
+          files: dark-optin.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
